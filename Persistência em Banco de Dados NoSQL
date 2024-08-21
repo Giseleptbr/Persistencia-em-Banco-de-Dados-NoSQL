@@ -1,0 +1,1081 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": [],
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/Giseleptbr/Persistencia-em-Banco-de-Dados-NoSQL/blob/main/Persist%C3%AAncia%20em%20Banco%20de%20Dados%20NoSQL\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "execution_count": null,
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "Gj2uqPICajo4",
+        "outputId": "98d31e49-88df-4014-be3e-2eec30c490d5"
+      },
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mounted at /content/drive\n"
+          ]
+        }
+      ],
+      "source": [
+        "from google.colab import drive\n",
+        "drive.mount('/content/drive')"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import files\n",
+        "uploaded = files.upload()"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 74
+        },
+        "id": "wYs-TnnAbYKj",
+        "outputId": "3acae695-d88f-4ca4-bf27-79e74fdd28bd"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "display_data",
+          "data": {
+            "text/plain": [
+              "<IPython.core.display.HTML object>"
+            ],
+            "text/html": [
+              "\n",
+              "     <input type=\"file\" id=\"files-6921cfde-287a-43d0-ba8d-5849296f4776\" name=\"files[]\" multiple disabled\n",
+              "        style=\"border:none\" />\n",
+              "     <output id=\"result-6921cfde-287a-43d0-ba8d-5849296f4776\">\n",
+              "      Upload widget is only available when the cell has been executed in the\n",
+              "      current browser session. Please rerun this cell to enable.\n",
+              "      </output>\n",
+              "      <script>// Copyright 2017 Google LLC\n",
+              "//\n",
+              "// Licensed under the Apache License, Version 2.0 (the \"License\");\n",
+              "// you may not use this file except in compliance with the License.\n",
+              "// You may obtain a copy of the License at\n",
+              "//\n",
+              "//      http://www.apache.org/licenses/LICENSE-2.0\n",
+              "//\n",
+              "// Unless required by applicable law or agreed to in writing, software\n",
+              "// distributed under the License is distributed on an \"AS IS\" BASIS,\n",
+              "// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.\n",
+              "// See the License for the specific language governing permissions and\n",
+              "// limitations under the License.\n",
+              "\n",
+              "/**\n",
+              " * @fileoverview Helpers for google.colab Python module.\n",
+              " */\n",
+              "(function(scope) {\n",
+              "function span(text, styleAttributes = {}) {\n",
+              "  const element = document.createElement('span');\n",
+              "  element.textContent = text;\n",
+              "  for (const key of Object.keys(styleAttributes)) {\n",
+              "    element.style[key] = styleAttributes[key];\n",
+              "  }\n",
+              "  return element;\n",
+              "}\n",
+              "\n",
+              "// Max number of bytes which will be uploaded at a time.\n",
+              "const MAX_PAYLOAD_SIZE = 100 * 1024;\n",
+              "\n",
+              "function _uploadFiles(inputId, outputId) {\n",
+              "  const steps = uploadFilesStep(inputId, outputId);\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  // Cache steps on the outputElement to make it available for the next call\n",
+              "  // to uploadFilesContinue from Python.\n",
+              "  outputElement.steps = steps;\n",
+              "\n",
+              "  return _uploadFilesContinue(outputId);\n",
+              "}\n",
+              "\n",
+              "// This is roughly an async generator (not supported in the browser yet),\n",
+              "// where there are multiple asynchronous steps and the Python side is going\n",
+              "// to poll for completion of each step.\n",
+              "// This uses a Promise to block the python side on completion of each step,\n",
+              "// then passes the result of the previous step as the input to the next step.\n",
+              "function _uploadFilesContinue(outputId) {\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  const steps = outputElement.steps;\n",
+              "\n",
+              "  const next = steps.next(outputElement.lastPromiseValue);\n",
+              "  return Promise.resolve(next.value.promise).then((value) => {\n",
+              "    // Cache the last promise value to make it available to the next\n",
+              "    // step of the generator.\n",
+              "    outputElement.lastPromiseValue = value;\n",
+              "    return next.value.response;\n",
+              "  });\n",
+              "}\n",
+              "\n",
+              "/**\n",
+              " * Generator function which is called between each async step of the upload\n",
+              " * process.\n",
+              " * @param {string} inputId Element ID of the input file picker element.\n",
+              " * @param {string} outputId Element ID of the output display.\n",
+              " * @return {!Iterable<!Object>} Iterable of next steps.\n",
+              " */\n",
+              "function* uploadFilesStep(inputId, outputId) {\n",
+              "  const inputElement = document.getElementById(inputId);\n",
+              "  inputElement.disabled = false;\n",
+              "\n",
+              "  const outputElement = document.getElementById(outputId);\n",
+              "  outputElement.innerHTML = '';\n",
+              "\n",
+              "  const pickedPromise = new Promise((resolve) => {\n",
+              "    inputElement.addEventListener('change', (e) => {\n",
+              "      resolve(e.target.files);\n",
+              "    });\n",
+              "  });\n",
+              "\n",
+              "  const cancel = document.createElement('button');\n",
+              "  inputElement.parentElement.appendChild(cancel);\n",
+              "  cancel.textContent = 'Cancel upload';\n",
+              "  const cancelPromise = new Promise((resolve) => {\n",
+              "    cancel.onclick = () => {\n",
+              "      resolve(null);\n",
+              "    };\n",
+              "  });\n",
+              "\n",
+              "  // Wait for the user to pick the files.\n",
+              "  const files = yield {\n",
+              "    promise: Promise.race([pickedPromise, cancelPromise]),\n",
+              "    response: {\n",
+              "      action: 'starting',\n",
+              "    }\n",
+              "  };\n",
+              "\n",
+              "  cancel.remove();\n",
+              "\n",
+              "  // Disable the input element since further picks are not allowed.\n",
+              "  inputElement.disabled = true;\n",
+              "\n",
+              "  if (!files) {\n",
+              "    return {\n",
+              "      response: {\n",
+              "        action: 'complete',\n",
+              "      }\n",
+              "    };\n",
+              "  }\n",
+              "\n",
+              "  for (const file of files) {\n",
+              "    const li = document.createElement('li');\n",
+              "    li.append(span(file.name, {fontWeight: 'bold'}));\n",
+              "    li.append(span(\n",
+              "        `(${file.type || 'n/a'}) - ${file.size} bytes, ` +\n",
+              "        `last modified: ${\n",
+              "            file.lastModifiedDate ? file.lastModifiedDate.toLocaleDateString() :\n",
+              "                                    'n/a'} - `));\n",
+              "    const percent = span('0% done');\n",
+              "    li.appendChild(percent);\n",
+              "\n",
+              "    outputElement.appendChild(li);\n",
+              "\n",
+              "    const fileDataPromise = new Promise((resolve) => {\n",
+              "      const reader = new FileReader();\n",
+              "      reader.onload = (e) => {\n",
+              "        resolve(e.target.result);\n",
+              "      };\n",
+              "      reader.readAsArrayBuffer(file);\n",
+              "    });\n",
+              "    // Wait for the data to be ready.\n",
+              "    let fileData = yield {\n",
+              "      promise: fileDataPromise,\n",
+              "      response: {\n",
+              "        action: 'continue',\n",
+              "      }\n",
+              "    };\n",
+              "\n",
+              "    // Use a chunked sending to avoid message size limits. See b/62115660.\n",
+              "    let position = 0;\n",
+              "    do {\n",
+              "      const length = Math.min(fileData.byteLength - position, MAX_PAYLOAD_SIZE);\n",
+              "      const chunk = new Uint8Array(fileData, position, length);\n",
+              "      position += length;\n",
+              "\n",
+              "      const base64 = btoa(String.fromCharCode.apply(null, chunk));\n",
+              "      yield {\n",
+              "        response: {\n",
+              "          action: 'append',\n",
+              "          file: file.name,\n",
+              "          data: base64,\n",
+              "        },\n",
+              "      };\n",
+              "\n",
+              "      let percentDone = fileData.byteLength === 0 ?\n",
+              "          100 :\n",
+              "          Math.round((position / fileData.byteLength) * 100);\n",
+              "      percent.textContent = `${percentDone}% done`;\n",
+              "\n",
+              "    } while (position < fileData.byteLength);\n",
+              "  }\n",
+              "\n",
+              "  // All done.\n",
+              "  yield {\n",
+              "    response: {\n",
+              "      action: 'complete',\n",
+              "    }\n",
+              "  };\n",
+              "}\n",
+              "\n",
+              "scope.google = scope.google || {};\n",
+              "scope.google.colab = scope.google.colab || {};\n",
+              "scope.google.colab._files = {\n",
+              "  _uploadFiles,\n",
+              "  _uploadFilesContinue,\n",
+              "};\n",
+              "})(self);\n",
+              "</script> "
+            ]
+          },
+          "metadata": {}
+        },
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Saving books(1).json to books(1).json\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Importando a biblioteca pandas\n",
+        "import pandas as pd"
+      ],
+      "metadata": {
+        "id": "-UiUSqfsbd8G"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Carregar o arquivo JSON em um DataFrame\n",
+        "df_sample = pd.read_json('/content/books(1).json', lines=True)\n"
+      ],
+      "metadata": {
+        "id": "uvd9DcYTndwh"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Examinar as primeiras linhas do DataFrame\n",
+        "sample_head = df_sample.head()"
+      ],
+      "metadata": {
+        "id": "b7bqEa5lnq-x"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Obter a lista de colunas\n",
+        "columns_list = df_sample.columns.tolist()"
+      ],
+      "metadata": {
+        "id": "NZvok6N_nxC3"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "sample_head"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 310
+        },
+        "id": "HiRPZf4Qn1ix",
+        "outputId": "fe310cf8-6d2f-468c-c1b0-c5744dc29008"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "  _id                              title        isbn  pageCount  \\\n",
+              "0   1                  Unlocking Android  1933988673        416   \n",
+              "1   2  Android in Action, Second Edition  1935182722        592   \n",
+              "2   3           Specification by Example  1617290084          0   \n",
+              "3   4                   Flex 3 in Action  1933988746        576   \n",
+              "4   5                   Flex 4 in Action  1935182420        600   \n",
+              "\n",
+              "                               publishedDate  \\\n",
+              "0  {'$date': '2009-04-01T00:00:00.000-0700'}   \n",
+              "1  {'$date': '2011-01-14T00:00:00.000-0800'}   \n",
+              "2  {'$date': '2011-06-03T00:00:00.000-0700'}   \n",
+              "3  {'$date': '2009-02-02T00:00:00.000-0800'}   \n",
+              "4  {'$date': '2010-11-15T00:00:00.000-0800'}   \n",
+              "\n",
+              "                                        thumbnailUrl  \\\n",
+              "0  https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....   \n",
+              "1  https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....   \n",
+              "2  https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....   \n",
+              "3  https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....   \n",
+              "4  https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....   \n",
+              "\n",
+              "                                    shortDescription  \\\n",
+              "0  Unlocking Android: A Developer's Guide provide...   \n",
+              "1  Android in Action, Second Edition is a compreh...   \n",
+              "2                                                NaN   \n",
+              "3                                                NaN   \n",
+              "4                                                NaN   \n",
+              "\n",
+              "                                     longDescription   status  \\\n",
+              "0  Android is an open source mobile phone platfor...  PUBLISH   \n",
+              "1  When it comes to mobile apps, Android can do a...  PUBLISH   \n",
+              "2                                                NaN  PUBLISH   \n",
+              "3  New web applications require engaging user-fri...  PUBLISH   \n",
+              "4  Using Flex, you can create high-quality, effec...  PUBLISH   \n",
+              "\n",
+              "                                             authors              categories  \n",
+              "0      [W. Frank Ableson, Charlie Collins, Robi Sen]   [Open Source, Mobile]  \n",
+              "1                       [W. Frank Ableson, Robi Sen]                  [Java]  \n",
+              "2                                      [Gojko Adzic]  [Software Engineering]  \n",
+              "3        [Tariq Ahmed with Jon Hirschi, Faisal Abid]              [Internet]  \n",
+              "4  [Tariq Ahmed, Dan Orlando, John C. Bland II, J...              [Internet]  "
+            ],
+            "text/html": [
+              "\n",
+              "  <div id=\"df-4f992120-84c7-420a-b75f-87b783d76984\" class=\"colab-df-container\">\n",
+              "    <div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>_id</th>\n",
+              "      <th>title</th>\n",
+              "      <th>isbn</th>\n",
+              "      <th>pageCount</th>\n",
+              "      <th>publishedDate</th>\n",
+              "      <th>thumbnailUrl</th>\n",
+              "      <th>shortDescription</th>\n",
+              "      <th>longDescription</th>\n",
+              "      <th>status</th>\n",
+              "      <th>authors</th>\n",
+              "      <th>categories</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>1</td>\n",
+              "      <td>Unlocking Android</td>\n",
+              "      <td>1933988673</td>\n",
+              "      <td>416</td>\n",
+              "      <td>{'$date': '2009-04-01T00:00:00.000-0700'}</td>\n",
+              "      <td>https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....</td>\n",
+              "      <td>Unlocking Android: A Developer's Guide provide...</td>\n",
+              "      <td>Android is an open source mobile phone platfor...</td>\n",
+              "      <td>PUBLISH</td>\n",
+              "      <td>[W. Frank Ableson, Charlie Collins, Robi Sen]</td>\n",
+              "      <td>[Open Source, Mobile]</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>2</td>\n",
+              "      <td>Android in Action, Second Edition</td>\n",
+              "      <td>1935182722</td>\n",
+              "      <td>592</td>\n",
+              "      <td>{'$date': '2011-01-14T00:00:00.000-0800'}</td>\n",
+              "      <td>https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....</td>\n",
+              "      <td>Android in Action, Second Edition is a compreh...</td>\n",
+              "      <td>When it comes to mobile apps, Android can do a...</td>\n",
+              "      <td>PUBLISH</td>\n",
+              "      <td>[W. Frank Ableson, Robi Sen]</td>\n",
+              "      <td>[Java]</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>3</td>\n",
+              "      <td>Specification by Example</td>\n",
+              "      <td>1617290084</td>\n",
+              "      <td>0</td>\n",
+              "      <td>{'$date': '2011-06-03T00:00:00.000-0700'}</td>\n",
+              "      <td>https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>PUBLISH</td>\n",
+              "      <td>[Gojko Adzic]</td>\n",
+              "      <td>[Software Engineering]</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>4</td>\n",
+              "      <td>Flex 3 in Action</td>\n",
+              "      <td>1933988746</td>\n",
+              "      <td>576</td>\n",
+              "      <td>{'$date': '2009-02-02T00:00:00.000-0800'}</td>\n",
+              "      <td>https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>New web applications require engaging user-fri...</td>\n",
+              "      <td>PUBLISH</td>\n",
+              "      <td>[Tariq Ahmed with Jon Hirschi, Faisal Abid]</td>\n",
+              "      <td>[Internet]</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>5</td>\n",
+              "      <td>Flex 4 in Action</td>\n",
+              "      <td>1935182420</td>\n",
+              "      <td>600</td>\n",
+              "      <td>{'$date': '2010-11-15T00:00:00.000-0800'}</td>\n",
+              "      <td>https://s3.amazonaws.com/AKIAJC5RLADLUMVRPFDQ....</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>Using Flex, you can create high-quality, effec...</td>\n",
+              "      <td>PUBLISH</td>\n",
+              "      <td>[Tariq Ahmed, Dan Orlando, John C. Bland II, J...</td>\n",
+              "      <td>[Internet]</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "</div>\n",
+              "    <div class=\"colab-df-buttons\">\n",
+              "\n",
+              "  <div class=\"colab-df-container\">\n",
+              "    <button class=\"colab-df-convert\" onclick=\"convertToInteractive('df-4f992120-84c7-420a-b75f-87b783d76984')\"\n",
+              "            title=\"Convert this dataframe to an interactive table.\"\n",
+              "            style=\"display:none;\">\n",
+              "\n",
+              "  <svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\" viewBox=\"0 -960 960 960\">\n",
+              "    <path d=\"M120-120v-720h720v720H120Zm60-500h600v-160H180v160Zm220 220h160v-160H400v160Zm0 220h160v-160H400v160ZM180-400h160v-160H180v160Zm440 0h160v-160H620v160ZM180-180h160v-160H180v160Zm440 0h160v-160H620v160Z\"/>\n",
+              "  </svg>\n",
+              "    </button>\n",
+              "\n",
+              "  <style>\n",
+              "    .colab-df-container {\n",
+              "      display:flex;\n",
+              "      gap: 12px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert {\n",
+              "      background-color: #E8F0FE;\n",
+              "      border: none;\n",
+              "      border-radius: 50%;\n",
+              "      cursor: pointer;\n",
+              "      display: none;\n",
+              "      fill: #1967D2;\n",
+              "      height: 32px;\n",
+              "      padding: 0 0 0 0;\n",
+              "      width: 32px;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-convert:hover {\n",
+              "      background-color: #E2EBFA;\n",
+              "      box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "      fill: #174EA6;\n",
+              "    }\n",
+              "\n",
+              "    .colab-df-buttons div {\n",
+              "      margin-bottom: 4px;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert {\n",
+              "      background-color: #3B4455;\n",
+              "      fill: #D2E3FC;\n",
+              "    }\n",
+              "\n",
+              "    [theme=dark] .colab-df-convert:hover {\n",
+              "      background-color: #434B5C;\n",
+              "      box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "      filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "      fill: #FFFFFF;\n",
+              "    }\n",
+              "  </style>\n",
+              "\n",
+              "    <script>\n",
+              "      const buttonEl =\n",
+              "        document.querySelector('#df-4f992120-84c7-420a-b75f-87b783d76984 button.colab-df-convert');\n",
+              "      buttonEl.style.display =\n",
+              "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "\n",
+              "      async function convertToInteractive(key) {\n",
+              "        const element = document.querySelector('#df-4f992120-84c7-420a-b75f-87b783d76984');\n",
+              "        const dataTable =\n",
+              "          await google.colab.kernel.invokeFunction('convertToInteractive',\n",
+              "                                                    [key], {});\n",
+              "        if (!dataTable) return;\n",
+              "\n",
+              "        const docLinkHtml = 'Like what you see? Visit the ' +\n",
+              "          '<a target=\"_blank\" href=https://colab.research.google.com/notebooks/data_table.ipynb>data table notebook</a>'\n",
+              "          + ' to learn more about interactive tables.';\n",
+              "        element.innerHTML = '';\n",
+              "        dataTable['output_type'] = 'display_data';\n",
+              "        await google.colab.output.renderOutput(dataTable, element);\n",
+              "        const docLink = document.createElement('div');\n",
+              "        docLink.innerHTML = docLinkHtml;\n",
+              "        element.appendChild(docLink);\n",
+              "      }\n",
+              "    </script>\n",
+              "  </div>\n",
+              "\n",
+              "\n",
+              "<div id=\"df-1c88bdcb-086d-4c28-b6de-6ca6a4d62d93\">\n",
+              "  <button class=\"colab-df-quickchart\" onclick=\"quickchart('df-1c88bdcb-086d-4c28-b6de-6ca6a4d62d93')\"\n",
+              "            title=\"Suggest charts.\"\n",
+              "            style=\"display:none;\">\n",
+              "\n",
+              "<svg xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\"viewBox=\"0 0 24 24\"\n",
+              "     width=\"24px\">\n",
+              "    <g>\n",
+              "        <path d=\"M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z\"/>\n",
+              "    </g>\n",
+              "</svg>\n",
+              "  </button>\n",
+              "\n",
+              "<style>\n",
+              "  .colab-df-quickchart {\n",
+              "    background-color: #E8F0FE;\n",
+              "    border: none;\n",
+              "    border-radius: 50%;\n",
+              "    cursor: pointer;\n",
+              "    display: none;\n",
+              "    fill: #1967D2;\n",
+              "    height: 32px;\n",
+              "    padding: 0 0 0 0;\n",
+              "    width: 32px;\n",
+              "  }\n",
+              "\n",
+              "  .colab-df-quickchart:hover {\n",
+              "    background-color: #E2EBFA;\n",
+              "    box-shadow: 0px 1px 2px rgba(60, 64, 67, 0.3), 0px 1px 3px 1px rgba(60, 64, 67, 0.15);\n",
+              "    fill: #174EA6;\n",
+              "  }\n",
+              "\n",
+              "  [theme=dark] .colab-df-quickchart {\n",
+              "    background-color: #3B4455;\n",
+              "    fill: #D2E3FC;\n",
+              "  }\n",
+              "\n",
+              "  [theme=dark] .colab-df-quickchart:hover {\n",
+              "    background-color: #434B5C;\n",
+              "    box-shadow: 0px 1px 3px 1px rgba(0, 0, 0, 0.15);\n",
+              "    filter: drop-shadow(0px 1px 2px rgba(0, 0, 0, 0.3));\n",
+              "    fill: #FFFFFF;\n",
+              "  }\n",
+              "</style>\n",
+              "\n",
+              "  <script>\n",
+              "    async function quickchart(key) {\n",
+              "      const charts = await google.colab.kernel.invokeFunction(\n",
+              "          'suggestCharts', [key], {});\n",
+              "    }\n",
+              "    (() => {\n",
+              "      let quickchartButtonEl =\n",
+              "        document.querySelector('#df-1c88bdcb-086d-4c28-b6de-6ca6a4d62d93 button');\n",
+              "      quickchartButtonEl.style.display =\n",
+              "        google.colab.kernel.accessAllowed ? 'block' : 'none';\n",
+              "    })();\n",
+              "  </script>\n",
+              "</div>\n",
+              "    </div>\n",
+              "  </div>\n"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 45
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "columns_list"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "odiqRNGMoILj",
+        "outputId": "639eaf00-d11f-43e4-b20d-976591e1568a"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "['_id',\n",
+              " 'title',\n",
+              " 'isbn',\n",
+              " 'pageCount',\n",
+              " 'publishedDate',\n",
+              " 'thumbnailUrl',\n",
+              " 'shortDescription',\n",
+              " 'longDescription',\n",
+              " 'status',\n",
+              " 'authors',\n",
+              " 'categories']"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 46
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Carregando o arquivo JSON em um DataFrame\n",
+        "df_books = pd.read_json(\"/content/books(1).json\", lines=True)"
+      ],
+      "metadata": {
+        "id": "OQBVJYrXbzRE"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 4: Contar o número total de livros\n",
+        "total_books = df_books.shape[0]"
+      ],
+      "metadata": {
+        "id": "qk3M3szAb4JF"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Total de livros: {total_books}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "hj-SCJwKcFIn",
+        "outputId": "6d801cc8-ec5d-4493-fca1-6113a639b3b1"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Total de livros: 431\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 5: Contar os livros com pageCount menor ou igual a 100\n",
+        "books_le_100_pages = df_books[df_books['pageCount'] <= 100].shape[0]"
+      ],
+      "metadata": {
+        "id": "1RI4wlogcKQn"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Livros com pageCount <= 100: {books_le_100_pages}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "u1_UsQ3-cSq5",
+        "outputId": "b0276cb3-ce7f-4009-a8d8-3f3c9a1797d9"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Livros com pageCount <= 100: 166\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 6: Contar os livros com isbn maior que \"1933988746\"\n",
+        "books_isbn_gt_value = df_books[df_books['isbn'] > \"1933988746\"].shape[0]"
+      ],
+      "metadata": {
+        "id": "OO0paG9mcbn9"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Livros com isbn > '1933988746': {books_isbn_gt_value}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "wGQmUHcEclFp",
+        "outputId": "87970301-2cf6-4f44-91f5-4cdfde8c5c2b"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Livros com isbn > '1933988746': 85\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 7: Consultar o título do livro que começa com a letra \"G\" e tem isbn menor ou igual a \"1617200000\"\n",
+        "book_title_with_g = df_books[(df_books['isbn'] <= \"1617200000\") & (df_books['title'].str.startswith('G'))]['title'].values[0]"
+      ],
+      "metadata": {
+        "id": "DTrwBHMYdAS2"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 8: Consultar o título do livro com isbn menor ou igual a \"1617200000\" e que começa com a letra \"G\"\n",
+        "book_title_with_g = df_books[(df_books['isbn'] <= \"1617200000\") & (df_books['title'].str.startswith('G'))]['title'].values[0]"
+      ],
+      "metadata": {
+        "id": "QT3PFV-TdaJn"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Título do livro que começa com 'G' e isbn <= '1617200000': {book_title_with_g}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "1RipbFA8dDV3",
+        "outputId": "999c2fb3-c9fa-4293-b470-b5f03f7ad568"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Título do livro que começa com 'G' e isbn <= '1617200000': Graphics File Formats\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 9: Contar os livros com isbn menor ou igual a \"10\" e \"100\"\n",
+        "books_isbn_le_10 = df_books[df_books['isbn'] <= \"10\"].shape[0]\n",
+        "books_isbn_le_100 = df_books[df_books['isbn'] <= \"100\"].shape[0]"
+      ],
+      "metadata": {
+        "id": "T3YbV4KJedbx"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Livros com isbn <= '10': {books_isbn_le_10}\")\n",
+        "print(f\"Livros com isbn <= '100': {books_isbn_le_100}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "D4oXV1S3eipL",
+        "outputId": "115c40bc-7e8a-4de4-a02c-13465c14a5be"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Livros com isbn <= '10': 4\n",
+            "Livros com isbn <= '100': 4\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 9: Contar os livros com isbn menor ou igual a \"10\" e \"100\"\n",
+        "books_isbn_le_10 = df_books[df_books['isbn'] <= \"10\"].shape[0]\n",
+        "books_isbn_le_100 = df_books[df_books['isbn'] <= \"100\"].shape[0]\n",
+        "\n",
+        "books_isbn_le_10, books_isbn_le_100"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "xKXUaZsqhUkI",
+        "outputId": "4f6050c7-18c3-4a74-cdc4-704b62b39f73"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(4, 4)"
+            ]
+          },
+          "metadata": {},
+          "execution_count": 59
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 10: Consultar os 2 primeiros livros com isbn menor ou igual a \"10\"\n",
+        "two_books_isbn_le_10 = df_books[df_books['isbn'] <= \"10\"].head(2)['title'].values"
+      ],
+      "metadata": {
+        "id": "mYw6p00AdKVw"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Livros com isbn <= '10': {two_books_isbn_le_10}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "aV3qhZDIdxni",
+        "outputId": "acc28c48-6b61-4d93-92ac-b362f1a25562"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Livros com isbn <= '10': ['Comprehensive Networking Glossary and Acronym Guide'\n",
+            " 'Personal Videoconferencing']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 10: Consultar os 2 primeiros livros com isbn menor ou igual a \"10\"\n",
+        "two_books_isbn_le_10 = df_books[df_books['isbn'] <= \"10\"].head(2)['title'].values"
+      ],
+      "metadata": {
+        "id": "c7KJ2PjReQT-"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Os 2 primeiros livros com isbn <= '10': {list(two_books_isbn_le_10)}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "d4IeyXt8e-Cm",
+        "outputId": "cca4cafe-ad60-42b5-8496-6675ba72b9e0"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Os 2 primeiros livros com isbn <= '10': ['Comprehensive Networking Glossary and Acronym Guide', 'Personal Videoconferencing']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 11: Usando o comando similar ao skip(), vamos pular os 2 primeiros registros e pegar os próximos registros\n",
+        "# onde o isbn é menor ou igual a \"100\"\n",
+        "books_after_skip = df_books[df_books['isbn'] <= \"100\"].iloc[2:]['title'].values"
+      ],
+      "metadata": {
+        "id": "t75IAiV1fB6Z"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Livros com isbn <= '100' após pular os 2 primeiros: {list(books_after_skip)}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "8sCIMnXZfO0-",
+        "outputId": "95504b91-38c2-4619-e66d-9b139bcdbe3d"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Livros com isbn <= '100' após pular os 2 primeiros: ['Multimedia Computing', 'Implementing SAP R/3, Second Edition']\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 12: Consultar títulos dos livros que contêm a palavra \"Windows\"\n",
+        "books_with_windows = df_books[df_books['title'].str.contains('Windows', case=False)].shape[0]"
+      ],
+      "metadata": {
+        "id": "EBoxqWiifSQm"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Número de livros com a palavra 'Windows' no título: {books_with_windows}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "l9wazTaafY6e",
+        "outputId": "62e7789e-7474-4318-8883-13acf2912a7f"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Número de livros com a palavra 'Windows' no título: 11\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "# Passo 13: Descobrindo os dois maiores valores para a chave pageCount\n",
+        "two_largest_page_counts = df_books.nlargest(2, 'pageCount')['pageCount'].values"
+      ],
+      "metadata": {
+        "id": "ABxXr-cqffJR"
+      },
+      "execution_count": null,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "print(f\"Os dois maiores valores para pageCount: {list(two_largest_page_counts)}\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "sjK0D07Ffo0k",
+        "outputId": "7609f1b5-8606-425c-9d59-d2fd3dd478c1"
+      },
+      "execution_count": null,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Os dois maiores valores para pageCount: [1101, 1096]\n"
+          ]
+        }
+      ]
+    }
+  ]
+}
